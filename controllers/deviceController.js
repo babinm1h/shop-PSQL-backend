@@ -6,19 +6,20 @@ class DeviceController {
 
     async create(req, res, next) {
         try {
-            const { name, price, typeId, brandId, info } = req.body
-            const candidate = await Device.findAll({ where: { name } })
+            let { name, price, typeId, brandId, info } = req.body
+            const candidate = await Device.findOne({ where: { name } })
             if (candidate) {
                 return res.status(400).json({ message: "Устройство с таким названием уже существует" })
             }
             const { img } = req.files
             let fileName = uuid.v4() + ".jpg"
             img.mv(path.resolve(__dirname, "..", "static", fileName))
+
             const device = await Device.create({ name, price, typeId, brandId, img: fileName })
 
             if (info) {
                 info = JSON.parse(info)
-                info.forEach(i => DeviceInfo.create({
+                info.forEach((i) => DeviceInfo.create({
                     title: i.title,
                     description: i.description,
                     deviceId: device.id
